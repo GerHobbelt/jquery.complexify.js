@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>JQuery Complexify</title>
+  </head>
+  <body>
+<script src="lib/jquery.js"></script>
+<script type="text/javascript" src="jquery.complexify.banlist.js"></script>
+<script type="text/javascript" src="jquery.complexify.js"></script>
+
+<h1>jQuery Complexify</h1>
+
+<p>Websites have a responsibility to users to accurately tell them how good a password is, and this is not an easy job.</p>
+<ul>
+    <li>If your password is 8 characters long and only formed of lower case characters, you need to make it better, perhaps by adding a number or more characters.</li>
+    <li>If your password is 25 characters long but happens to not contain a number, you shouldn't be forced by a password security policy to add one, you clearly have a very secure password.</li>
+</ul>
+<p>Complexify aims to provide a good measure of password complexity for websites to use both for giving hints to users in the form of strength bars, and for casually enforcing a minimum complexity for security reasons.</p>
+<p><em>Note:</em> I use the term 'casually' because this is only client-side validation and anyone could turn it off. I recommend implementing a minimum length check server-side as well. In the future I may code up this algorithm for use server-side.</p>
+<h3>Complexity Rating</h3>
+<p>Complexify's default settings will enforce a minimum level of complexity that would mean brute-forcing should take ~600 years on a commodity desktop machine. The 'perfect' password used to scale the complexity percentage would take 3x10^33 years. These are equivalent to a 12 character password with uppercase, lowercase and numbers included, and a 25 character password with uppercase, lowercase, numbers and a wide range of punctuation.</p>
+<h3>Unicode</h3>
+<p>Complexify supports Unicode and will add appropriate complexity for the size of character set included in a password.</p>
+<p>For example, as there are 96 Hiragana characters defined in the Unicode specification, including one of these will increase the brute-force complexity  by 96.</p>
+<p>The rationale behind this is that in an attacker were wanting to include Japanese passwords in his attack, he/she may choose to include the Hiragana set in his/her attack, but not the Katakana set. Complexify divides Unicode into 94 appropriately grouped sets.</p>
+
+<br/>
+<br/>
+<h2>Try it out:</h2>
+<br/>
+<div id="demo">
+    <input type="password" id="password" placeholder="Password">
+    <div id="progressbar"><div id="progress"></div></div>
+    <div id="status">
+        <div id="complexity">0%</div>
+        <div id="complexityLabel">Complexity</div>
+    </div>
+</div>
+<br/>
+<br/>
+
+<h2>How do I use it?</h2>
+<p>
+    Complexify is a jQuery plugin, so you will already need to have jQuery included on your page. Other than this, just include the file in your page like this:
+</p>
+<script src="https://gist.github.com/4288084.js"></script>
+<p>
+    The <code>valid</code> argument passed to your callback function is a boolean that indicates whether the password met the minimum number of password characters <em>and</em> the minimum level of complexity. The <code>complexity</code> argument is a percentage where 100% represents a 'perfect' password of 25 characters containing one element from each available character set.
+</p>
+<p>
+    The options are the <code>minimumChars</code> that the password must have to be valid, which defaults to 8, and the <code>strengthScaleFactor</code> which will be applied during complexity calculation to raise or lower the complexity required to be valid. This defaults to 1.
+</p>
+<h4>What Complexify <em>doesn't</em> do:</h4>
+<ol>
+    <li>It does not take into account possible dictionary attacking of passwords. However most passwords vulnerable to this method are relatively short and contain only letters, making them score fairly weakly on this test anyway.</li>
+    <li>It's still just client-side validation. If someone wants to bypass this they can, I recommend implementing a check for the minimum length on the server, but I am considering making a complementary server-side library that will enable developers to have a consistent policy set up throughout their service.</li>
+</ol>
+<br/>
+
+<h4>Complexify Ports</h4>
+<p>As Complexify is only client-side, for it to be truly useful some server-side validation is also needed. The following ports have been made to different environments:</p>
+<ul>
+    <li><a href="https://github.com/mertdumenci/Complexify-ObjC">Complexify-ObjC</a> &ndash; Objective-C port by <a href="http://dumenci.me/">Mert Dümenci</a>.</li>
+    <li><a href="https://github.com/kislyuk/node-complexify">node-complexify</a> &ndash; a Node.js module for validating complexity.</li>
+</ul>
+<br/><br/>
+<h4>Version History</h4>
+<p><b>0.2</b> - Unicode support<br/>
+Note: most passwords using punctuation will score slightly lower as the punctuation set has been split into multiple sets.</p>
+<p><b>0.1</b> - Basic implementation</p>
+<br/><br/>
+<h4>Usage Notes</h4>
+<p>If you wish to use Complexify, grab a copy from GitHub, or even just this site, but please don't hotlink to the script hosted here. Hotlinking to scripts from untrusted sources is a security risk.</p>
+<a href="https://raw.github.com/danpalmer/jquery.complexify.js/master/jquery.complexify.js">Download</a> &mdash;
+<a href="https://raw.github.com/danpalmer/jquery.complexify.js/">Fork and Watch on Github</a>
+
+<script type="text/javascript">
+    $(function () {
+        $("#password").complexify({}, function (valid, complexity) {
+            if (!valid) {
+                $('#progress').css({'width':complexity + '%'}).removeClass('progressbarValid').addClass('progressbarInvalid');
+            } else {
+                $('#progress').css({'width':complexity + '%'}).removeClass('progressbarInvalid').addClass('progressbarValid');
+            }
+            $('#complexity').html(Math.round(complexity) + '%');
+        });
+    });
+</script>
+<style type="text/css">
+    body {
+        text-align:left;
+        font-family:"Helvetica Neue", "Helvetica", Arial, sans-serif;
+        font-size:16px;
+        line-height:24px;
+        margin:1em 2em 1em 2em;
+    }
+
+    #demo {
+        width:380px;
+        margin-right:auto;
+        margin-left:auto;
+    }
+
+    #progressbar {
+        width:388px;
+        height:48px;
+        display:block;
+        border-left:1px solid #ccc;
+        border-right:1px solid #ccc;
+        border-top:1px solid #ccc;
+        border-top-right-radius: 8px;
+        border-top-left-radius: 8px;
+        overflow:hidden;
+        background-color: white;
+    }
+
+    #progress {
+        display:block;
+        height:100px;
+        width:0%;
+    }
+
+    .progressbarValid {
+        background-color:green;
+        background-image: -o-linear-gradient(-90deg, #8AD702 0%, #389100 100%);
+      background-image: -moz-linear-gradient(-90deg, #8AD702 0%, #389100 100%);
+      background-image: -webkit-linear-gradient(-90deg, #8AD702 0%, #389100 100%);
+      background-image: -ms-linear-gradient(-90deg, #8AD702 0%, #389100 100%);
+      background-image: linear-gradient(-90deg, #8AD702 0%, #389100 100%);
+    }
+
+    .progressbarInvalid {
+        background-color:red;
+        background-image: -o-linear-gradient(-90deg, #F94046 0%, #92080B 100%);
+      background-image: -moz-linear-gradient(-90deg, #F94046 0%, #92080B 100%);
+      background-image: -webkit-linear-gradient(-90deg, #F94046 0%, #92080B 100%);
+      background-image: -ms-linear-gradient(-90deg, #F94046 0%, #92080B 100%);
+      background-image: linear-gradient(-90deg, #F94046 0%, #92080B 100%);
+    }
+
+    #status {
+        height:150px;
+        width:388px;
+        border:1px solid #ccc;
+        border-bottom-right-radius: 8px;
+        border-bottom-left-radius: 8px;
+        background-color: white;
+    }
+
+    #password {
+        width:100%;
+        height:40px;
+        font-size:30px;
+        line-height:40px;
+        border-radius: 8px;
+        padding: 4px;
+
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        margin-bottom: 9px;
+        color: #555555;
+        border: 1px solid #cccccc;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        -webkit-text-security: disc;
+        -webkit-appearance: textfield;
+        outline: none;
+    }
+
+    #complexityLabel {
+        width:100%;
+        text-align:center;
+        margin-top:10px;
+        font-size:20px;
+        line-height:30px;
+    }
+
+    #complexity {
+        width:100%;
+        text-align:center;
+        font-family:"Helvetica Neue", "Helvetica", Arial, sans-serif;
+        font-weight:bold;
+        font-size:70px;
+        line-height:80px;
+        margin-top:10px;
+    }
+
+</style>
+
+
+<div class="copyright">Copyright &copy; Dan Palmer 2012</div>
+  </body>
+</html>
